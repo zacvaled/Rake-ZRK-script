@@ -11,16 +11,17 @@ local Window = Rayfield:CreateWindow({
       FolderName = "RakeZRKHub",
       FileName = "UserConfig"
    },
-   Discord = {
-      Enabled = false
-   },
+   Discord = { Enabled = false },
    KeySystem = false
 })
 
--- MAIN TAB
-local MainTab = Window:CreateTab("Main")
+-- Tabs with icons
+local MainTab = Window:CreateTab("Main", 12443244377)
+local ESPTab = Window:CreateTab("ESP", 13549782540)
+local FunTab = Window:CreateTab("Fun", 3057073095)
+local WeaponTab = Window:CreateTab("Weapon", 124599541946939)
 
--- Infinite Stamina Toggle
+-- ================= MAIN TAB =================
 MainTab:CreateToggle({
     Name = "Infinite Stamina",
     CurrentValue = false,
@@ -41,18 +42,20 @@ MainTab:CreateToggle({
     end
 })
 
--- No Fall Damage Button
-MainTab:CreateButton({
-    Name = "Remove Fall Damage",
-    Callback = function()
-        pcall(function()
-            local fd = game.Players.LocalPlayer.Character:FindFirstChild("FallDamage")
-            if fd then fd:Destroy() end
-        end)
+MainTab:CreateToggle({
+    Name = "No Fall Damage",
+    CurrentValue = false,
+    Flag = "NoFallDamage",
+    Callback = function(value)
+        if value then
+            pcall(function()
+                local fd = game.Players.LocalPlayer.Character:FindFirstChild("FallDamage")
+                if fd then fd:Destroy() end
+            end)
+        end
     end
 })
 
--- Run Speed Slider
 MainTab:CreateSlider({
     Name = "Run Speed",
     Range = {16, 100},
@@ -68,62 +71,66 @@ MainTab:CreateSlider({
     end
 })
 
--- ESP TAB
-local ESPTab = Window:CreateTab("ESP")
+MainTab:CreateSlider({
+    Name = "Proximity Prompt Hold Duration",
+    Range = {0, 5},
+    Increment = 0.1,
+    Suffix = "s",
+    CurrentValue = 0,
+    Flag = "PromptDuration",
+    Callback = function(value)
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") then
+                obj.HoldDuration = value
+            end
+        end
+    end
+})
+
+-- ================= ESP TAB =================
 ESPTab:CreateToggle({
     Name = "MrRake ESP",
     CurrentValue = false,
     Flag = "MrRakeESP",
     Callback = function(value)
         getgenv().MrRakeESP = value
-        if value then
-            spawn(function()
-                while getgenv().MrRakeESP do
-                    pcall(function()
-                        local rake = workspace:FindFirstChild("MrRake")
-                        if rake and rake:FindFirstChild("HumanoidRootPart") then
-                            local billboard = rake:FindFirstChild("ESPBillboard")
-                            if not billboard then
-                                billboard = Instance.new("BillboardGui")
-                                billboard.Name = "ESPBillboard"
-                                billboard.Adornee = rake:WaitForChild("HumanoidRootPart")
-                                billboard.Size = UDim2.new(0,100,0,50)
-                                billboard.StudsOffset = Vector3.new(0,3,0)
-                                billboard.AlwaysOnTop = true
-                                local label = Instance.new("TextLabel")
-                                label.Size = UDim2.new(1,0,1,0)
-                                label.BackgroundTransparency = 1
-                                label.TextColor3 = Color3.fromRGB(255,0,0)
-                                label.Font = Enum.Font.GothamBold
-                                label.TextSize = 14
-                                label.Text = rake.Name .. " | " .. math.floor(rake:FindFirstChild("Humanoid").Health)
-                                label.Parent = billboard
-                                billboard.Parent = rake
-                            else
-                                local label = billboard:FindFirstChildOfClass("TextLabel")
-                                if label and rake:FindFirstChild("Humanoid") then
-                                    label.Text = rake.Name .. " | " .. math.floor(rake.Humanoid.Health)
-                                end
+        spawn(function()
+            while getgenv().MrRakeESP do
+                for _, npc in pairs(workspace:GetDescendants()) do
+                    if npc.Name == "MrRake" and npc:IsA("Model") then
+                        if not npc:FindFirstChild("ESP") then
+                            local billboard = Instance.new("BillboardGui")
+                            billboard.Name = "ESP"
+                            billboard.Size = UDim2.new(0,100,0,50)
+                            billboard.Adornee = npc:FindFirstChild("HumanoidRootPart")
+                            billboard.AlwaysOnTop = true
+
+                            local label = Instance.new("TextLabel")
+                            label.Size = UDim2.new(1,0,1,0)
+                            label.BackgroundTransparency = 1
+                            label.TextColor3 = Color3.new(1,0,0)
+                            label.Font = Enum.Font.GothamBold
+                            label.TextSize = 14
+                            label.Text = npc.Name .. " | HP: " .. (npc:FindFirstChild("Humanoid") and npc.Humanoid.Health or 0)
+                            label.Parent = billboard
+
+                            billboard.Parent = npc
+                        else
+                            local hb = npc:FindFirstChild("ESP")
+                            local label = hb:FindFirstChildWhichIsA("TextLabel")
+                            if label and npc:FindFirstChild("Humanoid") then
+                                label.Text = npc.Name .. " | HP: " .. npc.Humanoid.Health
                             end
                         end
-                    end)
-                    task.wait(0.2)
+                    end
                 end
-            end)
-        else
-            local rake = workspace:FindFirstChild("MrRake")
-            if rake then
-                local esp = rake:FindFirstChild("ESPBillboard")
-                if esp then esp:Destroy() end
+                task.wait(0.5)
             end
-        end
+        end)
     end
 })
 
--- FUN TAB
-local FunTab = Window:CreateTab("Fun")
-
--- Infinite Jump
+-- ================= FUN TAB =================
 FunTab:CreateToggle({
     Name = "Infinite Jump",
     CurrentValue = false,
@@ -133,7 +140,6 @@ FunTab:CreateToggle({
     end
 })
 
--- Noclip
 FunTab:CreateToggle({
     Name = "Noclip",
     CurrentValue = false,
@@ -145,9 +151,7 @@ FunTab:CreateToggle({
             game:GetService('RunService').Stepped:Connect(function()
                 if getgenv().NoClip and player.Character then
                     for _, part in pairs(player.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
+                        if part:IsA("BasePart") then part.CanCollide = false end
                     end
                 end
             end)
@@ -155,32 +159,32 @@ FunTab:CreateToggle({
     end
 })
 
--- Sky Fall Button
 FunTab:CreateButton({
     Name = "Sky Fall",
     Callback = function()
-        local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+        local player = game.Players.LocalPlayer
+        local hum = player.Character:FindFirstChild("Humanoid")
         if hum then
-            local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
             if root then
-                root.CFrame = root.CFrame + Vector3.new(0,1000,0)
+                root.CFrame = root.CFrame + Vector3.new(0,500,0) -- teleport up
             end
+            hum:ChangeState(Enum.HumanoidStateType.Freefall)
         end
     end
 })
 
--- Rainbow Weapon Button
 FunTab:CreateButton({
-    Name = "Rainbow Weapon",
+    Name = "Rainbow Current Weapon",
     Callback = function()
         local player = game.Players.LocalPlayer
-        local tool = player.Character:FindFirstChildOfClass("Tool")
-        if tool then
+        local weapon = player.Character:FindFirstChildOfClass("Tool")
+        if weapon then
             spawn(function()
-                while tool.Parent do
-                    for _, part in pairs(tool:GetDescendants()) do
+                while weapon and weapon.Parent == player.Character do
+                    for _, part in pairs(weapon:GetDescendants()) do
                         if part:IsA("BasePart") then
-                            part.Color = Color3.fromHSV(tick() % 5 / 5,1,1)
+                            part.Color = Color3.fromHSV(tick()%1,1,1)
                         end
                     end
                     task.wait(0.1)
@@ -190,45 +194,44 @@ FunTab:CreateButton({
     end
 })
 
--- Weapons TAB
-local WeaponTab = Window:CreateTab("Weapons")
-
--- Big Hitbox Button
+-- ================= WEAPON TAB =================
 WeaponTab:CreateButton({
-    Name = "Big Hitbox",
+    Name = "Big Hitbox (40,40,40)",
     Callback = function()
         local player = game.Players.LocalPlayer
-        local tool = player.Character:FindFirstChildOfClass("Tool")
-        if tool then
-            for _, part in pairs(tool:GetDescendants()) do
-                if part:IsA("BasePart") and part.Name == "Hitbox" then
-                    part.Size = Vector3.new(40,40,40)
+        local weapon = player.Character:FindFirstChildOfClass("Tool")
+        if weapon then
+            local hitbox = weapon:FindFirstChild("Hitbox")
+            if hitbox and hitbox:IsA("BasePart") then
+                hitbox.Size = Vector3.new(40,40,40)
+            end
+        end
+    end
+})
+
+WeaponTab:CreateButton({
+    Name = "No Weapon Cooldown",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local weapon = player.Character:FindFirstChildOfClass("Tool")
+        if weapon then
+            local config = weapon:FindFirstChild("Configuration")
+            if config then
+                local cooldown = config:FindFirstChild("Cooldown")
+                if cooldown and cooldown:IsA("NumberValue") then
+                    cooldown.Value = 0
                 end
             end
         end
     end
 })
 
--- No Weapon Cooldown Button
-WeaponTab:CreateButton({
-    Name = "No Weapon Cooldown",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local tool = player.Character:FindFirstChildOfClass("Tool")
-        if tool and tool:FindFirstChild("Configuration") and tool.Configuration:FindFirstChild("Cooldown") then
-            tool.Configuration.Cooldown.Value = 0
-        end
-    end
-})
-
--- Infinite Jump Logic
+-- ================= Infinite Jump Logic =================
 game:GetService("UserInputService").JumpRequest:Connect(function()
     if getgenv().InfiniteJump then
         local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
     end
 end)
 
-print("Rake ZRK Rayfield GUI Full Bundle Loaded!")
+print("Rake ZRK Rayfield Full Bundle Loaded!")
