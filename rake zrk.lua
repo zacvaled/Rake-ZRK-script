@@ -15,11 +15,11 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false
 })
 
--- Tabs with icons
-local MainTab = Window:CreateTab("Main", 12443244377)
-local ESPTab = Window:CreateTab("ESP", 13549782540)
-local FunTab = Window:CreateTab("Fun", 3057073095)
-local WeaponTab = Window:CreateTab("Weapon", 124599541946939)
+-- Tabs with icons (fixed with rbxassetid://)
+local MainTab = Window:CreateTab("Main", "rbxassetid://12443244377")
+local ESPTab = Window:CreateTab("ESP", "rbxassetid://13549782540")
+local FunTab = Window:CreateTab("Fun", "rbxassetid://3057073095")
+local WeaponTab = Window:CreateTab("Weapon", "rbxassetid://124599541946939")
 
 -- ================= MAIN TAB =================
 MainTab:CreateToggle({
@@ -234,4 +234,4 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-print("Rake ZRK Rayfield Full Bundle Loaded!")
+print("Rake ZRK Rayfield Full Bundle Loaded with Icons!")
