@@ -1,4 +1,4 @@
--- Rake ZRK Hub - Complete Bundle with Correct Weapon Functions
+-- Rake ZRK Hub - Modified Version
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -201,32 +201,46 @@ MovementGroup:AddToggle("Noclip", {
     end,
 })
 
--- WalkSpeed Slider
-MovementGroup:AddSlider("WalkSpeed", {
-    Text = "Walk Speed",
-    Default = 16,
-    Min = 16,
-    Max = 100,
-    Rounding = 0,
-    Suffix = " speed",
+-- No Fall Damage Toggle
+MovementGroup:AddToggle("NoFallDamage", {
+    Text = "No Fall Damage",
+    Default = false,
     Callback = function(Value)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = Value
+        getgenv().NoFallDamage = Value
+        
+        local function handleFallDamage()
+            if LocalPlayer.Character then
+                local fallDamage = LocalPlayer.Character:FindFirstChild("FallDamage")
+                
+                if getgenv().NoFallDamage then
+                    -- Store and remove FallDamage
+                    if fallDamage and not getgenv().StoredFallDamage then
+                        getgenv().StoredFallDamage = fallDamage:Clone()
+                        fallDamage:Destroy()
+                    end
+                else
+                    -- Restore FallDamage if stored
+                    if getgenv().StoredFallDamage and not fallDamage then
+                        getgenv().StoredFallDamage.Parent = LocalPlayer.Character
+                        getgenv().StoredFallDamage = nil
+                    end
+                end
+            end
         end
-    end,
-})
-
--- JumpPower Slider
-MovementGroup:AddSlider("JumpPower", {
-    Text = "Jump Power",
-    Default = 50,
-    Min = 50,
-    Max = 200,
-    Rounding = 0,
-    Suffix = " power",
-    Callback = function(Value)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = Value
+        
+        -- Apply immediately
+        handleFallDamage()
+        
+        -- Monitor character changes
+        if Value then
+            getgenv().fallDamageConnection = LocalPlayer.CharacterAdded:Connect(function()
+                task.wait(1) -- Wait for character to load
+                handleFallDamage()
+            end)
+        else
+            if getgenv().fallDamageConnection then
+                getgenv().fallDamageConnection:Disconnect()
+            end
         end
     end,
 })
@@ -391,4 +405,4 @@ ThemeManager:ApplyToTab(Tabs["UI Settings"])
 
 SaveManager:LoadAutoloadConfig()
 
-print("Rake ZRK Complete Bundle Loaded - Press RightShift")
+print("Rake ZRK Modified Version Loaded - Press RightShift")
