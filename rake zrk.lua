@@ -9,7 +9,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Window = Library:CreateWindow({
-    Title = "Rake ZRK script by nurisla2rus",
+    Title = "Rake ZRK script by 0Zer0",
     Footer = "version: 1.0",
     Icon = 4483345998,
     ShowCustomCursor = true,
@@ -248,24 +248,15 @@ VisualGroup:AddToggle("FullBright", {
     end,
 })
 
-VisualGroup:AddToggle("NoFog", {
-    Text = "No Fog",
-    Default = false,
-    Callback = function(Value)
-        getgenv().NoFog = Value
-        if Value then
-            getgenv().fogConnection = RunService.Heartbeat:Connect(function()
-                if getgenv().NoFog then
-                    game:GetService("Lighting").FogEnd = 100000
-                end
-            end)
-        else
-            if getgenv().fogConnection then
-                getgenv().fogConnection:Disconnect()
-            end
-        end
-    end,
-})
+WorldGroup:AddButton("Remove Fog", function()
+    game:GetService("Lighting").FogEnd = 1000000
+    game:GetService("Lighting").FogStart = 1000000
+    Library:Notify({
+        Title = "Fog Removed",
+        Content = "All fog has been cleared from the game",
+        Time = 5
+    })
+end)
 
 local ESPGroup = Tabs.ESP:AddLeftGroupbox("Player ESP")
 
@@ -354,7 +345,7 @@ MenuGroup:AddColorpicker("AccentColor", {
 Library.ToggleKeybind = Options.MenuKeybind
 
 Library:Notify({
-    Title = "Rake ZRK Loaded!",
+    Title = "Rake ZRK script Loaded!",
     Content = "Press RightShift to show/hide menu",
     Time = 5
 })
