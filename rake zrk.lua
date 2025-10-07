@@ -1,4 +1,3 @@
--- Rake ZRK ULTIMATE BUNDLE by 0Zer0
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -10,8 +9,8 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Window = Library:CreateWindow({
-    Title = "Rake ZRK ULTIMATE by ferZ",
-    Footer = "FULL BUNDLE v2.0",
+    Title = "Rake ZRK script by ferZ",
+    Footer = "version: 1.0",
     Icon = 4483345998,
     ShowCustomCursor = true,
 })
@@ -25,9 +24,8 @@ local Tabs = {
     ["UI Settings"] = Window:AddTab("UI Settings", "settings"),
 }
 
--- MAIN TAB
 local MainLeftGroup = Tabs.Main:AddLeftGroupbox("Movement")
-local MainRightGroup = Tabs.Main:AddRightGroupbox("Stamina & Safety")
+local MainRightGroup = Tabs.Main:AddRightGroupbox("Stamina")
 
 MainLeftGroup:AddSlider("RunSpeed", {
     Text = "Run Speed",
@@ -63,9 +61,11 @@ MainRightGroup:AddToggle("NoFallDamage", {
     Default = false,
     Callback = function(Value)
         getgenv().NoFallDamage = Value
+        
         local function handleFallDamage()
             if LocalPlayer.Character then
                 local fallDamage = LocalPlayer.Character:FindFirstChild("FallDamage")
+                
                 if getgenv().NoFallDamage then
                     if fallDamage and not getgenv().StoredFallDamage then
                         getgenv().StoredFallDamage = fallDamage:Clone()
@@ -79,7 +79,9 @@ MainRightGroup:AddToggle("NoFallDamage", {
                 end
             end
         end
+        
         handleFallDamage()
+        
         if Value then
             getgenv().fallDamageConnection = LocalPlayer.CharacterAdded:Connect(function()
                 task.wait(1)
@@ -93,7 +95,6 @@ MainRightGroup:AddToggle("NoFallDamage", {
     end,
 })
 
--- WEAPONS TAB
 local WeaponConfigGroup = Tabs.Weapons:AddLeftGroupbox("Weapon Configuration")
 local HitboxGroup = Tabs.Weapons:AddRightGroupbox("Hitbox Settings")
 
@@ -174,7 +175,6 @@ RunService.Heartbeat:Connect(function()
     updateWeaponModifications()
 end)
 
--- LOCAL PLAYER TAB
 local MovementGroup = Tabs.LocalPlayer:AddLeftGroupbox("Movement")
 local PlayerGroup = Tabs.LocalPlayer:AddRightGroupbox("Player Controls")
 
@@ -220,7 +220,6 @@ MovementGroup:AddToggle("Noclip", {
     end,
 })
 
--- MISC TAB
 local VisualGroup = Tabs.Misc:AddLeftGroupbox("Visual Effects")
 local WorldGroup = Tabs.Misc:AddRightGroupbox("World Modifications")
 
@@ -259,57 +258,6 @@ WorldGroup:AddButton("Remove Fog", function()
     })
 end)
 
--- INSTANT PROXIMITY PROMPTS (HIGH PERFORMANCE)
-local InstantPromptsToggle = WorldGroup:AddToggle("InstantPrompts", {
-    Text = "Instant Proximity Prompts",
-    Default = false,
-    Callback = function(Value)
-        getgenv().InstantPrompts = Value
-        if Value then
-            -- Function to set all prompts to instant
-            local function setInstantPrompts()
-                for _, prompt in pairs(workspace:GetDescendants()) do
-                    if prompt:IsA("ProximityPrompt") then
-                        prompt.HoldDuration = 0
-                    end
-                end
-            end
-            
-            -- Set initially
-            setInstantPrompts()
-            
-            -- Monitor for new prompts
-            getgenv().promptConnection = workspace.DescendantAdded:Connect(function(descendant)
-                if descendant:IsA("ProximityPrompt") then
-                    descendant.HoldDuration = 0
-                end
-            end)
-            
-            -- Continuous refresh every 2 seconds (optimized)
-            getgenv().promptLoop = RunService.Heartbeat:Connect(function()
-                if getgenv().InstantPrompts then
-                    for _, prompt in pairs(workspace:GetDescendants()) do
-                        if prompt:IsA("ProximityPrompt") then
-                            prompt.HoldDuration = 0
-                        end
-                    end
-                else
-                    getgenv().promptLoop:Disconnect()
-                end
-            end)
-        else
-            -- Clean up connections
-            if getgenv().promptConnection then
-                getgenv().promptConnection:Disconnect()
-            end
-            if getgenv().promptLoop then
-                getgenv().promptLoop:Disconnect()
-            end
-        end
-    end,
-})
-
--- ESP TAB
 local ESPGroup = Tabs.ESP:AddLeftGroupbox("Player ESP")
 local ScrapGroup = Tabs.ESP:AddRightGroupbox("Scrap ESP")
 
@@ -367,6 +315,7 @@ ESPGroup:AddToggle("RakeESP", {
     end,
 })
 
+-- ADDED MESH SCRAP ESP
 ScrapGroup:AddToggle("ScrapESP", {
     Text = "Scrap ESP",
     Default = false,
@@ -416,227 +365,6 @@ ScrapGroup:AddToggle("ScrapESP", {
                     obj:Destroy()
                 end
                 if obj:IsA("BillboardGui") and obj.Parent then
-                    obj:Destroy()
-                end
-            end
-        end
-    end,
-})
-
--- UI SETTINGS
-local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu")
-local ThemeGroup = Tabs["UI Settings"]:AddRightGroupbox("Themes")
-
-MenuGroup:AddButton("Unload", function()
-    Library:Unload()
-end)
-
-MenuGroup:AddLabel("Menu Keybind"):AddKeyPicker("MenuKeybind", {
-    Default = "RightShift", 
-    NoUI = true, 
-    Text = "Menu keybind" 
-})
-
-Library.ToggleKeybind = Options.MenuKeybind
-
-Library:Notify({
-    Title = "Rake ZRK ULTIMATE Loaded!",
-    Content = "Full Bundle Activated - Press RightShift",
-    Time = 5
-})
-
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
-
-SaveManager:SetFolder("RakeZRKConfig")
-ThemeManager:SetFolder("RakeZRKConfig")
-
-SaveManager:BuildConfigSection(Tabs["UI Settings"])
-ThemeManager:ApplyToTab(Tabs["UI Settings"])
-
-SaveManager:LoadAutoloadConfig()
-
-print("Rake ZRK ULTIMATE BUNDLE Loaded - All Features Active")                    weapon.Hitbox.Size = originalHitboxSizes[weapon.Name]
-                end
-            end
-        end
-    end
-end
-
-WeaponConfigGroup:AddToggle("NoCooldown", {
-    Text = "No Cooldown Current Weapon",
-    Default = false,
-    Callback = function(Value)
-        getgenv().NoCooldown = Value
-        updateWeaponModifications()
-    end,
-})
-
-HitboxGroup:AddToggle("BigHitbox", {
-    Text = "Big Hitbox Current Weapon",
-    Default = false,
-    Callback = function(Value)
-        getgenv().BigHitbox = Value
-        updateWeaponModifications()
-    end,
-})
-
-RunService.Heartbeat:Connect(function()
-    updateWeaponModifications()
-end)
-
-local MovementGroup = Tabs.LocalPlayer:AddLeftGroupbox("Movement")
-local PlayerGroup = Tabs.LocalPlayer:AddRightGroupbox("Player Controls")
-
-MovementGroup:AddToggle("InfJump", {
-    Text = "Infinite Jump",
-    Default = false,
-    Callback = function(Value)
-        getgenv().InfJump = Value
-        if Value then
-            getgenv().jumpConnection = UserInputService.JumpRequest:Connect(function()
-                if getgenv().InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                    LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-                end
-            end)
-        else
-            if getgenv().jumpConnection then
-                getgenv().jumpConnection:Disconnect()
-            end
-        end
-    end,
-})
-
-MovementGroup:AddToggle("Noclip", {
-    Text = "Noclip",
-    Default = false,
-    Callback = function(Value)
-        getgenv().Noclip = Value
-        if Value then
-            getgenv().noclipConnection = RunService.Stepped:Connect(function()
-                if getgenv().Noclip and LocalPlayer.Character then
-                    for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
-                    end
-                end
-            end)
-        else
-            if getgenv().noclipConnection then
-                getgenv().noclipConnection:Disconnect()
-            end
-        end
-    end,
-})
-
-MovementGroup:AddToggle("NoFallDamage", {
-    Text = "No Fall Damage",
-    Default = false,
-    Callback = function(Value)
-        getgenv().NoFallDamage = Value
-        
-        local function handleFallDamage()
-            if LocalPlayer.Character then
-                local fallDamage = LocalPlayer.Character:FindFirstChild("FallDamage")
-                
-                if getgenv().NoFallDamage then
-                    if fallDamage and not getgenv().StoredFallDamage then
-                        getgenv().StoredFallDamage = fallDamage:Clone()
-                        fallDamage:Destroy()
-                    end
-                else
-                    if getgenv().StoredFallDamage and not fallDamage then
-                        getgenv().StoredFallDamage.Parent = LocalPlayer.Character
-                        getgenv().StoredFallDamage = nil
-                    end
-                end
-            end
-        end
-        
-        handleFallDamage()
-        
-        if Value then
-            getgenv().fallDamageConnection = LocalPlayer.CharacterAdded:Connect(function()
-                task.wait(1)
-                handleFallDamage()
-            end)
-        else
-            if getgenv().fallDamageConnection then
-                getgenv().fallDamageConnection:Disconnect()
-            end
-        end
-    end,
-})
-
-local VisualGroup = Tabs.Misc:AddLeftGroupbox("Visual Effects")
-local WorldGroup = Tabs.Misc:AddRightGroupbox("World Modifications")
-
-VisualGroup:AddToggle("FullBright", {
-    Text = "Full Bright",
-    Default = false,
-    Callback = function(Value)
-        getgenv().FullBright = Value
-        if Value then
-            getgenv().brightnessConnection = RunService.Heartbeat:Connect(function()
-                if getgenv().FullBright then
-                    game:GetService("Lighting").Brightness = 2
-                    game:GetService("Lighting").ClockTime = 14
-                    game:GetService("Lighting").FogEnd = 100000
-                    game:GetService("Lighting").GlobalShadows = false
-                    game:GetService("Lighting").OutdoorAmbient = Color3.new(1, 1, 1)
-                end
-            end)
-        else
-            if getgenv().brightnessConnection then
-                getgenv().brightnessConnection:Disconnect()
-                game:GetService("Lighting").Brightness = 1
-                game:GetService("Lighting").GlobalShadows = true
-            end
-        end
-    end,
-})
-
-WorldGroup:AddButton("Remove Fog", function()
-    game:GetService("Lighting").FogEnd = 1000000
-    game:GetService("Lighting").FogStart = 1000000
-    Library:Notify({
-        Title = "Fog Removed",
-        Content = "All fog has been cleared from the game",
-        Time = 5
-    })
-end)
-
-local ESPGroup = Tabs.ESP:AddLeftGroupbox("Player ESP")
-
-ESPGroup:AddToggle("RakeESP", {
-    Text = "MrRake ESP",
-    Default = false,
-    Callback = function(Value)
-        getgenv().RakeESP = Value
-        if Value then
-            local function highlightRake(model)
-                if model.Name == "MrRake" and model:IsA("Model") then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Adornee = model
-                    highlight.FillColor = Color3.new(1, 0, 0)
-                    highlight.Parent = model
-                end
-            end
-            
-            for _, obj in pairs(workspace:GetChildren()) do
-                highlightRake(obj)
-            end
-            
-            getgenv().rakeConn = workspace.ChildAdded:Connect(highlightRake)
-        else
-            if getgenv().rakeConn then
-                getgenv().rakeConn:Disconnect()
-            end
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("Highlight") then
                     obj:Destroy()
                 end
             end
@@ -696,7 +424,7 @@ MenuGroup:AddColorpicker("AccentColor", {
 Library.ToggleKeybind = Options.MenuKeybind
 
 Library:Notify({
-    Title = "Rake ZRK script Loaded!",
+    Title = "Rake ZRK Loaded!",
     Content = "Press RightShift to show/hide menu",
     Time = 5
 })
