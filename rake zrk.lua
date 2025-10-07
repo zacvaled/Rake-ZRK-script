@@ -1,4 +1,3 @@
--- Rake ZRK Hub - Modified Version
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -16,7 +15,6 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = true,
 })
 
--- Tabs
 local Tabs = {
     Main = Window:AddTab("Features", "user"),
     Weapons = Window:AddTab("Weapons", "gun"),
@@ -26,11 +24,9 @@ local Tabs = {
     ["UI Settings"] = Window:AddTab("UI Settings", "settings"),
 }
 
--- Main Tab Groupboxes
 local MainLeftGroup = Tabs.Main:AddLeftGroupbox("Movement")
 local MainRightGroup = Tabs.Main:AddRightGroupbox("Stamina")
 
--- Run Speed Slider
 MainLeftGroup:AddSlider("RunSpeed", {
     Text = "Run Speed",
     Default = 25,
@@ -45,7 +41,6 @@ MainLeftGroup:AddSlider("RunSpeed", {
     end,
 })
 
--- Infinite Stamina Toggle
 MainRightGroup:AddToggle("InfStamina", {
     Text = "Infinite Stamina",
     Default = false,
@@ -61,16 +56,12 @@ MainRightGroup:AddToggle("InfStamina", {
     end,
 })
 
--- Weapons Tab
 local WeaponConfigGroup = Tabs.Weapons:AddLeftGroupbox("Weapon Configuration")
 local HitboxGroup = Tabs.Weapons:AddRightGroupbox("Hitbox Settings")
 
--- Store original values
 local originalCooldowns = {}
 local originalHitboxSizes = {}
-local currentWeapon = nil
 
--- Function to get currently equipped weapon
 local function getCurrentWeapon()
     if LocalPlayer.Character then
         for _, tool in pairs(LocalPlayer.Character:GetChildren()) do
@@ -82,11 +73,9 @@ local function getCurrentWeapon()
     return nil
 end
 
--- Monitor weapon changes and apply modifications
 local function updateWeaponModifications()
     local weapon = getCurrentWeapon()
     if weapon then
-        -- Apply cooldown modification
         if getgenv().NoCooldown then
             if weapon:FindFirstChild("Configuration") then
                 local config = weapon.Configuration
@@ -98,7 +87,6 @@ local function updateWeaponModifications()
                 end
             end
         else
-            -- Restore cooldown if stored
             if originalCooldowns[weapon.Name] then
                 if weapon:FindFirstChild("Configuration") then
                     local config = weapon.Configuration
@@ -109,7 +97,6 @@ local function updateWeaponModifications()
             end
         end
         
-        -- Apply hitbox modification
         if getgenv().BigHitbox then
             if weapon:FindFirstChild("Hitbox") then
                 if not originalHitboxSizes[weapon.Name] then
@@ -118,7 +105,6 @@ local function updateWeaponModifications()
                 weapon.Hitbox.Size = Vector3.new(40, 40, 40)
             end
         else
-            -- Restore hitbox if stored
             if originalHitboxSizes[weapon.Name] then
                 if weapon:FindFirstChild("Hitbox") then
                     weapon.Hitbox.Size = originalHitboxSizes[weapon.Name]
@@ -128,7 +114,6 @@ local function updateWeaponModifications()
     end
 end
 
--- No Cooldown Toggle
 WeaponConfigGroup:AddToggle("NoCooldown", {
     Text = "No Cooldown Current Weapon",
     Default = false,
@@ -138,7 +123,6 @@ WeaponConfigGroup:AddToggle("NoCooldown", {
     end,
 })
 
--- Big Hitbox Toggle
 HitboxGroup:AddToggle("BigHitbox", {
     Text = "Big Hitbox Current Weapon",
     Default = false,
@@ -148,16 +132,13 @@ HitboxGroup:AddToggle("BigHitbox", {
     end,
 })
 
--- Monitor weapon changes continuously
 RunService.Heartbeat:Connect(function()
     updateWeaponModifications()
 end)
 
--- Local Player Tab
 local MovementGroup = Tabs.LocalPlayer:AddLeftGroupbox("Movement")
 local PlayerGroup = Tabs.LocalPlayer:AddRightGroupbox("Player Controls")
 
--- Infinite Jump
 MovementGroup:AddToggle("InfJump", {
     Text = "Infinite Jump",
     Default = false,
@@ -177,7 +158,6 @@ MovementGroup:AddToggle("InfJump", {
     end,
 })
 
--- Noclip
 MovementGroup:AddToggle("Noclip", {
     Text = "Noclip",
     Default = false,
@@ -201,7 +181,6 @@ MovementGroup:AddToggle("Noclip", {
     end,
 })
 
--- No Fall Damage Toggle
 MovementGroup:AddToggle("NoFallDamage", {
     Text = "No Fall Damage",
     Default = false,
@@ -213,13 +192,11 @@ MovementGroup:AddToggle("NoFallDamage", {
                 local fallDamage = LocalPlayer.Character:FindFirstChild("FallDamage")
                 
                 if getgenv().NoFallDamage then
-                    -- Store and remove FallDamage
                     if fallDamage and not getgenv().StoredFallDamage then
                         getgenv().StoredFallDamage = fallDamage:Clone()
                         fallDamage:Destroy()
                     end
                 else
-                    -- Restore FallDamage if stored
                     if getgenv().StoredFallDamage and not fallDamage then
                         getgenv().StoredFallDamage.Parent = LocalPlayer.Character
                         getgenv().StoredFallDamage = nil
@@ -228,13 +205,11 @@ MovementGroup:AddToggle("NoFallDamage", {
             end
         end
         
-        -- Apply immediately
         handleFallDamage()
         
-        -- Monitor character changes
         if Value then
             getgenv().fallDamageConnection = LocalPlayer.CharacterAdded:Connect(function()
-                task.wait(1) -- Wait for character to load
+                task.wait(1)
                 handleFallDamage()
             end)
         else
@@ -245,11 +220,9 @@ MovementGroup:AddToggle("NoFallDamage", {
     end,
 })
 
--- Misc Tab
 local VisualGroup = Tabs.Misc:AddLeftGroupbox("Visual Effects")
 local WorldGroup = Tabs.Misc:AddRightGroupbox("World Modifications")
 
--- Full Bright
 VisualGroup:AddToggle("FullBright", {
     Text = "Full Bright",
     Default = false,
@@ -275,7 +248,6 @@ VisualGroup:AddToggle("FullBright", {
     end,
 })
 
--- No Fog
 VisualGroup:AddToggle("NoFog", {
     Text = "No Fog",
     Default = false,
@@ -295,10 +267,8 @@ VisualGroup:AddToggle("NoFog", {
     end,
 })
 
--- ESP Tab
 local ESPGroup = Tabs.ESP:AddLeftGroupbox("Player ESP")
 
--- MrRake ESP Toggle
 ESPGroup:AddToggle("RakeESP", {
     Text = "MrRake ESP",
     Default = false,
@@ -332,7 +302,6 @@ ESPGroup:AddToggle("RakeESP", {
     end,
 })
 
--- UI Settings
 local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu")
 local ThemeGroup = Tabs["UI Settings"]:AddRightGroupbox("Themes")
 
@@ -384,14 +353,12 @@ MenuGroup:AddColorpicker("AccentColor", {
 
 Library.ToggleKeybind = Options.MenuKeybind
 
--- Notify on load
 Library:Notify({
     Title = "Rake ZRK Loaded!",
     Content = "Press RightShift to show/hide menu",
     Time = 5
 })
 
--- Theme and Save Managers
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
@@ -404,5 +371,3 @@ SaveManager:BuildConfigSection(Tabs["UI Settings"])
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 
 SaveManager:LoadAutoloadConfig()
-
-print("Rake ZRK Modified Version Loaded - Press RightShift")
