@@ -9,7 +9,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Window = Library:CreateWindow({
-    Title = "Rake ZRK script by 0Zer0",
+    Title = "Rake ZRK script by FexZ",
     Footer = "version: 1.0",
     Icon = 4483345998,
     ShowCustomCursor = true,
